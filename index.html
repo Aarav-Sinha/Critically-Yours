@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Critically Yours — DPS Megacity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=Outfit:wght@200;300;400;500;600;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* ═══════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --ease: cubic-bezier(0.4,0,0.2,1);
+  --t1: 0.3s var(--ease);
+  --t2: 0.5s var(--ease);
+  --t3: 0.7s var(--ease);
+}
+[data-theme="dark"] {
+  --bg:         #06060C;
+  --bg2:        #0C0C18;
+  --bg3:        #121220;
+  --bg4:        #1A1A2C;
+  --text:       #EDE8DC;
+  --text2:      #8A8474;
+  --text3:      #40403A;
+  --gold:       #C8973A;
+  --gold2:      #E0B85A;
+  --gold3:      rgba(200,151,58,0.08);
+  --crimson:    #9B2338;
+  --crimson2:   #C03050;
+  --border:     rgba(200,151,58,0.10);
+  --border2:    rgba(255,255,255,0.04);
+  --border3:    rgba(255,255,255,0.08);
+  --glow-gold:  rgba(200,151,58,0.12);
+  --glow-red:   rgba(155,35,56,0.08);
+  --shadow:     0 8px 40px rgba(0,0,0,0.6);
+  --shadow2:    0 24px 80px rgba(0,0,0,0.8);
+  --invert-logo: 0;
+}
+[data-theme="light"] {
+  --bg:         #F6F1E7;
+  --bg2:        #EEE8DA;
+  --bg3:        #FFFFFF;
+  --bg4:        #FAF7F0;
+  --text:       #1A1520;
+  --text2:      #584E50;
+  --text3:      #A09898;
+  --gold:       #9A6820;
+  --gold2:      #B88030;
+  --gold3:      rgba(154,104,32,0.06);
+  --crimson:    #8B1A30;
+  --crimson2:   #A82840;
+  --border:     rgba(154,104,32,0.18);
+  --border2:    rgba(0,0,0,0.05);
+  --border3:    rgba(0,0,0,0.10);
+  --glow-gold:  rgba(154,104,32,0.06);
+  --glow-red:   rgba(139,26,48,0.04);
+  --shadow:     0 8px 40px rgba(0,0,0,0.08);
+  --shadow2:    0 24px 80px rgba(0,0,0,0.12);
+  --invert-logo: 0;
+}
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  min-height: 100vh;
+  transition: background var(--t2), color var(--t2);
+}
+
+/* Grain overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ═══════════════════════════════════════════
+   CUSTOM CURSOR
+═══════════════════════════════════════════ */
+.cursor-dot {
+  position: fixed;
+  width: 5px; height: 5px;
+  background: var(--gold);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%,-50%);
+  transition: transform 0.05s, opacity 0.3s;
+}
+.cursor-ring {
+  position: fixed;
+  width: 32px; height: 32px;
+  border: 1px solid rgba(200,151,58,0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%,-50%);
+  transition: transform 0.12s var(--ease), width var(--t1), height var(--t1), border-color var(--t1), opacity 0.3s;
+}
+body.cursor-hover .cursor-ring {
+  width: 52px; height: 52px;
+  border-color: var(--gold);
+}
+@media (hover: none) { .cursor-dot, .cursor-ring { display: none; } }
+
+/* ═══════════════════════════════════════════
+   PRELOADER
+═══════════════════════════════════════════ */
+.preloader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 99997;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2.5rem;
+  transition: opacity 0.8s var(--ease), visibility 0.8s var(--ease);
+}
+.preloader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+.pl-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.4rem;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+  opacity: 0;
+  animation: plFade 0.6s 0.2s var(--ease) forwards;
+}
+.pl-sub {
+  font-size: 0.65rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--text3);
+  opacity: 0;
+  animation: plFade 0.6s 0.5s var(--ease) forwards;
+  margin-top: -2rem;
+}
+.pl-bar {
+  width: 200px; height: 1px;
+  background: var(--border2);
+  overflow: hidden;
+  opacity: 0;
+  animation: plFade 0.4s 0.7s var(--ease) forwards;
+}
+.pl-progress {
+  height: 100%;
+  background: linear-gradient(90deg, var(--crimson), var(--gold));
+  width: 0;
+  animation: plLoad 1.0s 0.8s var(--ease) forwards;
+}
+@keyframes plFade { to { opacity: 1; } }
+@keyframes plLoad { to { width: 100%; } }
+
+/* ═══════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════ */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 3rem;
+  height: 66px;
+  border-bottom: 1px solid transparent;
+  transition: all var(--t2);
+}
+nav.scrolled {
+  background: rgba(6,6,12,0.92);
+  border-bottom-color: var(--border2);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  height: 58px;
+}
+[data-theme="light"] nav.scrolled {
+  background: rgba(246,241,231,0.94);
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  text-decoration: none;
+  transition: color var(--t1);
+}
+.nav-logo em { font-style: italic; color: var(--gold); font-weight: 300; }
+.nav-right { display: flex; align-items: center; gap: 0.8rem; }
+.theme-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem;
+  transition: all var(--t1);
+}
+.theme-btn:hover { border-color: var(--gold); color: var(--gold); }
+.nav-login {
+  padding: 0.45rem 1.3rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--gold);
+  border-radius: 2px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.73rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--t1);
+}
+.nav-login:hover { background: var(--gold); color: var(--bg); }
+
+/* ═══════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10rem 2rem 6rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Atmospheric glows */
+.hero-glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.hero-glow-1 {
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, var(--glow-gold) 0%, transparent 70%);
+  top: -15%; left: -15%;
+  animation: floatGlow 10s ease-in-out infinite;
+}
+.hero-glow-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, var(--glow-red) 0%, transparent 70%);
+  bottom: 10%; right: -8%;
+  animation: floatGlow 14s ease-in-out infinite reverse;
+}
+.hero-glow-3 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, var(--glow-gold) 0%, transparent 70%);
+  bottom: -10%; left: 30%;
+  animation: floatGlow 12s ease-in-out infinite 3s;
+}
+@keyframes floatGlow {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%      { transform: translate(30px,-40px) scale(1.08); }
+  66%      { transform: translate(-20px,30px) scale(0.95); }
+}
+
+/* Ghost background text */
+.hero-ghost {
+  position: absolute;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: min(32vw, 280px);
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.03em;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,151,58,0.04);
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+  white-space: nowrap;
+  line-height: 1;
+  z-index: 0;
+  user-select: none;
+}
+[data-theme="light"] .hero-ghost { -webkit-text-stroke-color: rgba(154,104,32,0.05); }
+
+/* Thin vertical center line */
+.hero-vline {
+  position: absolute;
+  left: 50%; top: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent 0%, var(--gold) 40%, var(--gold) 60%, transparent 100%);
+  opacity: 0.08;
+  z-index: 0;
+}
+
+/* Hero content */
+.hero-content { position: relative; z-index: 2; }
+.hero-eyebrow {
+  font-size: 0.67rem;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 1.6rem;
+  opacity: 0;
+  animation: riseUp 0.9s 1.8s var(--ease) forwards;
+}
+.hero-school {
+  font-size: 0.73rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 2.8rem;
+  opacity: 0;
+  animation: riseUp 0.9s 2.0s var(--ease) forwards;
+}
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  line-height: 0.88;
+  opacity: 0;
+  animation: riseUp 0.9s 2.1s var(--ease) forwards;
+}
+.hero-title .line-c {
+  font-size: clamp(5.5rem, 15vw, 12rem);
+  font-weight: 300;
+  font-style: italic;
+  display: block;
+  color: var(--text);
+  letter-spacing: -0.015em;
+}
+.hero-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.8rem;
+  margin: 1.8rem 0;
+  opacity: 0;
+  animation: riseUp 0.9s 2.3s var(--ease) forwards;
+}
+.hero-ornament::before, .hero-ornament::after {
+  content: '';
+  width: 140px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0.5;
+}
+.hero-ornament-icon {
+  width: 24px; height: 24px;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.hero-ornament-icon::after {
+  content: '✦';
+  font-size: 0.55rem;
+  color: var(--gold);
+  line-height: 1;
+}
+.hero-title .line-y {
+  font-size: clamp(4.5rem, 12vw, 10rem);
+  font-weight: 600;
+  display: block;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+}
+.hero-tagline {
+  margin-top: 2.8rem;
+  font-size: 0.9rem;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  color: var(--text2);
+  max-width: 500px;
+  line-height: 1.9;
+  opacity: 0;
+  animation: riseUp 0.9s 2.4s var(--ease) forwards;
+}
+.hero-cta {
+  margin-top: 2.8rem;
+  display: flex;
+  gap: 0.9rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: riseUp 0.9s 2.5s var(--ease) forwards;
+}
+.hero-meta {
+  margin-top: 4rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  justify-content: center;
+  opacity: 0;
+  animation: riseUp 0.9s 2.7s var(--ease) forwards;
+}
+.hero-meta-item {
+  text-align: center;
+}
+.hero-meta-item span:first-child {
+  display: block;
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 0.25rem;
+}
+.hero-meta-item span:last-child {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--text);
+}
+.hero-meta-sep {
+  width: 1px; height: 36px;
+  background: var(--border2);
+}
+.scroll-cue {
+  margin-top: 4.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  animation: riseUp 0.9s 3.0s var(--ease) forwards;
+}
+.scroll-cue span {
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.scroll-cue-line {
+  width: 1px; height: 48px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  animation: scrollLine 1.8s ease-in-out infinite;
+}
+@keyframes scrollLine {
+  0%,100% { opacity: 0.3; transform: scaleY(0.5) translateY(0); }
+  50%      { opacity: 1; transform: scaleY(1) translateY(6px); }
+}
+
+/* ═══════════════════════════════════════════
+   MARQUEE
+═══════════════════════════════════════════ */
+.marquee-wrap {
+  overflow: hidden;
+  background: var(--gold);
+  padding: 0.6rem 0;
+  border-top: none;
+  border-bottom: none;
+}
+.marquee-inner {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marqueeScroll 28s linear infinite;
+}
+.marquee-inner:hover { animation-play-state: paused; }
+.marquee-item {
+  font-size: 0.67rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--bg);
+  padding: 0 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.marquee-item i { font-size: 0.5rem; opacity: 0.7; }
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn-primary {
+  padding: 0.85rem 2.2rem;
+  background: var(--gold);
+  color: var(--bg);
+  border: none;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.73rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  text-decoration: none;
+  transition: all var(--t1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.btn-primary:hover { background: var(--gold2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,151,58,0.3); }
+.btn-outline {
+  padding: 0.85rem 2.2rem;
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border3);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.73rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  text-decoration: none;
+  transition: all var(--t1);
+}
+.btn-outline:hover { border-color: var(--text); color: var(--text); transform: translateY(-2px); }
+
+/* ═══════════════════════════════════════════
+   SHARED SECTION STYLES
+═══════════════════════════════════════════ */
+.section-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+.section-label::before, .section-label::after {
+  content: '';
+  width: 32px; height: 1px;
+  background: var(--gold);
+  opacity: 0.4;
+}
+.section-header {
+  text-align: center;
+  margin-bottom: 4.5rem;
+}
+.section-header h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.1;
+}
+.section-header p {
+  margin-top: 0.7rem;
+  font-size: 0.87rem;
+  color: var(--text2);
+  font-weight: 300;
+}
+
+/* Reveal on scroll */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════
+   COUNTDOWN
+═══════════════════════════════════════════ */
+.countdown-section {
+  padding: 6rem 2rem;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.countdown-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 100%, var(--glow-gold), transparent);
+  pointer-events: none;
+}
+.countdown-grid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  max-width: 680px;
+  margin: 0 auto 2.5rem;
+}
+.count-unit {
+  flex: 1;
+  text-align: center;
+  padding: 2.5rem 1rem;
+  border: 1px solid var(--border);
+  border-right: none;
+  background: var(--bg);
+  position: relative;
+  transition: background var(--t1);
+}
+.count-unit:first-child { border-radius: 4px 0 0 4px; }
+.count-unit:last-child  { border-right: 1px solid var(--border); border-radius: 0 4px 4px 0; }
+.count-unit:hover       { background: var(--bg3); }
+.count-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(3.5rem, 7vw, 5.5rem);
+  font-weight: 300;
+  color: var(--gold);
+  line-height: 1;
+  display: block;
+  transition: all 0.3s;
+  letter-spacing: -0.02em;
+}
+.count-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-top: 0.6rem;
+  display: block;
+}
+.count-sep-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 0.4rem;
+}
+.count-sep {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: var(--text3);
+  line-height: 1;
+}
+.fest-date-info {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text2);
+  letter-spacing: 0.06em;
+}
+.fest-date-info span { color: var(--gold); }
+
+/* ═══════════════════════════════════════════
+   EVENTS
+═══════════════════════════════════════════ */
+.events-section { padding: 7rem 2rem; }
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 1px;
+  max-width: 1120px;
+  margin: 0 auto;
+  background: var(--border2);
+  border: 1px solid var(--border2);
+}
+.event-card {
+  background: var(--bg);
+  padding: 2.8rem;
+  position: relative;
+  overflow: hidden;
+  transition: background var(--t1);
+}
+.event-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--crimson), var(--gold));
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform var(--t2);
+}
+.event-card::after {
+  content: attr(data-num);
+  position: absolute;
+  top: 1.5rem; right: 1.8rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 4rem;
+  font-weight: 700;
+  font-style: italic;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,151,58,0.07);
+  line-height: 1;
+  pointer-events: none;
+  transition: -webkit-text-stroke-color var(--t2);
+}
+[data-theme="light"] .event-card::after { -webkit-text-stroke-color: rgba(154,104,32,0.06); }
+.event-card:hover { background: var(--bg2); }
+.event-card:hover::before { transform: scaleY(1); }
+.event-card:hover::after { -webkit-text-stroke-color: rgba(200,151,58,0.12); }
+.event-num-tag {
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 1rem;
+  font-family: 'Courier Prime', monospace;
+}
+.event-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.9rem;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.15;
+  margin-bottom: 0.9rem;
+}
+.event-desc {
+  font-size: 0.84rem;
+  color: var(--text2);
+  line-height: 1.85;
+  font-weight: 300;
+  margin-bottom: 1.8rem;
+}
+.event-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.event-tag {
+  font-size: 0.67rem;
+  letter-spacing: 0.1em;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--border2);
+  color: var(--text3);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all var(--t1);
+}
+.event-tag i { font-size: 0.6rem; color: var(--gold); }
+.event-card:hover .event-tag { border-color: var(--border); }
+.events-empty, .load-placeholder {
+  text-align: center;
+  padding: 5rem 2rem;
+  color: var(--text3);
+  grid-column: 1 / -1;
+}
+.events-empty i { font-size: 2rem; opacity: 0.2; display: block; margin-bottom: 1rem; }
+.events-empty p { font-size: 0.87rem; }
+
+/* ═══════════════════════════════════════════
+   LOADING DOTS
+═══════════════════════════════════════════ */
+.loading-dots {
+  display: flex;
+  gap: 7px;
+  justify-content: center;
+  padding: 3rem;
+}
+.loading-dots span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0.3;
+  animation: ldot 1.4s ease-in-out infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes ldot {
+  0%,80%,100% { opacity: 0.2; transform: scale(0.8); }
+  40%          { opacity: 1; transform: scale(1); }
+}
+
+/* ═══════════════════════════════════════════
+   DIVIDER
+═══════════════════════════════════════════ */
+.ornamental-divider {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+.ornamental-divider::before, .ornamental-divider::after {
+  content: '';
+  flex: 1; height: 1px;
+  background: var(--border);
+}
+.ornamental-divider-text {
+  font-size: 0.62rem;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: var(--text3);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════
+   ANNOUNCEMENTS
+═══════════════════════════════════════════ */
+.announcements-section {
+  padding: 7rem 2rem;
+  background: var(--bg2);
+}
+.ann-list {
+  max-width: 760px;
+  margin: 0 auto;
+}
+.ann-item {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 2rem;
+  padding: 2rem 0;
+  border-bottom: 1px solid var(--border2);
+  align-items: start;
+  transition: all var(--t1);
+}
+.ann-item:last-child { border-bottom: none; }
+.ann-item:hover .ann-date-num { color: var(--gold2); }
+.ann-date {
+  text-align: center;
+  padding-top: 0.2rem;
+}
+.ann-date-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  font-weight: 300;
+  color: var(--gold);
+  line-height: 1;
+  display: block;
+  transition: color var(--t1);
+}
+.ann-date-mon {
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text3);
+  display: block;
+  margin-top: 0.3rem;
+  font-family: 'Courier Prime', monospace;
+}
+.ann-content h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+.ann-content p {
+  font-size: 0.83rem;
+  color: var(--text2);
+  line-height: 1.8;
+  font-weight: 300;
+}
+.ann-empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text3);
+  font-size: 0.87rem;
+}
+
+/* ═══════════════════════════════════════════
+   TIMELINE
+═══════════════════════════════════════════ */
+.timeline-section { padding: 7rem 2rem; }
+.timeline {
+  max-width: 680px;
+  margin: 0 auto;
+  position: relative;
+  padding-left: 3rem;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 12px; bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  opacity: 0.3;
+}
+.tl-item {
+  padding: 0 0 3rem 2.5rem;
+  position: relative;
+}
+.tl-item:last-child { padding-bottom: 0; }
+.tl-dot {
+  position: absolute;
+  left: -5px; top: 8px;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--gold);
+  transition: background var(--t1);
+}
+.tl-item:hover .tl-dot { background: var(--gold); }
+.tl-time {
+  font-size: 0.67rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.4rem;
+  font-family: 'Courier Prime', monospace;
+}
+.tl-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+}
+.tl-desc {
+  font-size: 0.82rem;
+  color: var(--text2);
+  line-height: 1.8;
+  font-weight: 300;
+}
+.tl-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text3);
+  font-size: 0.87rem;
+}
+
+/* ═══════════════════════════════════════════
+   VENUE
+═══════════════════════════════════════════ */
+.venue-section {
+  padding: 7rem 2rem;
+  background: var(--bg2);
+}
+.venue-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+.venue-text h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--text);
+  margin-bottom: 2.5rem;
+  line-height: 1.2;
+}
+.venue-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+.venue-icon-wrap {
+  width: 38px; height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color var(--t1), background var(--t1);
+}
+.venue-row:hover .venue-icon-wrap { border-color: var(--gold); background: var(--gold3); }
+.venue-icon-wrap i { font-size: 0.72rem; color: var(--gold); }
+.venue-row-text > p:first-child {
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 0.25rem;
+}
+.venue-row-text > p:last-child {
+  font-size: 0.9rem;
+  color: var(--text);
+}
+.venue-map-placeholder {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  color: var(--text3);
+  font-size: 0.82rem;
+  transition: border-color var(--t1);
+}
+.venue-map-placeholder:hover { border-color: var(--border); }
+.venue-map-placeholder i { font-size: 1.8rem; opacity: 0.2; }
+
+/* ═══════════════════════════════════════════
+   RULES
+═══════════════════════════════════════════ */
+.rules-section { padding: 7rem 2rem; }
+.rules-inner { max-width: 760px; margin: 0 auto; }
+.rule-accordion {
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.rule-item { border-bottom: 1px solid var(--border2); }
+.rule-item:last-child { border-bottom: none; }
+.rule-header {
+  padding: 1.3rem 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background var(--t1);
+  font-size: 0.87rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+.rule-header:hover { background: var(--bg2); }
+.rule-header i { font-size: 0.72rem; color: var(--text3); transition: transform var(--t1); }
+.rule-header.open { color: var(--gold); }
+.rule-header.open i { transform: rotate(180deg); color: var(--gold); }
+.rule-body {
+  padding: 0 1.6rem;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s var(--ease), padding 0.35s var(--ease);
+}
+.rule-body.open { max-height: 600px; padding: 0 1.6rem 1.4rem; }
+.rule-body p {
+  font-size: 0.82rem;
+  color: var(--text2);
+  line-height: 1.9;
+  font-weight: 300;
+}
+.rule-body ul {
+  padding-left: 1.2rem;
+  margin-top: 0.5rem;
+}
+.rule-body ul li {
+  font-size: 0.82rem;
+  color: var(--text2);
+  line-height: 1.9;
+  font-weight: 300;
+  margin-bottom: 0.3rem;
+}
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+footer {
+  background: var(--bg2);
+  border-top: 1px solid var(--border2);
+  padding: 4rem 2rem 3rem;
+}
+.footer-top {
+  max-width: 1000px;
+  margin: 0 auto 3rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 3rem;
+}
+.footer-brand .f-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--gold);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.footer-brand .f-sub {
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text3);
+  display: block;
+  margin-bottom: 1.2rem;
+}
+.footer-brand p {
+  font-size: 0.81rem;
+  color: var(--text3);
+  line-height: 1.8;
+  font-weight: 300;
+}
+.footer-col h4 {
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 1.2rem;
+}
+.footer-col a {
+  display: block;
+  font-size: 0.84rem;
+  color: var(--text2);
+  text-decoration: none;
+  margin-bottom: 0.6rem;
+  transition: color var(--t1);
+}
+.footer-col a:hover { color: var(--gold); }
+.footer-bottom {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.footer-bottom p {
+  font-size: 0.72rem;
+  color: var(--text3);
+  letter-spacing: 0.04em;
+}
+.footer-bottom a {
+  font-size: 0.72rem;
+  color: var(--text3);
+  text-decoration: none;
+  transition: color var(--t1);
+}
+.footer-bottom a:hover { color: var(--gold); }
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
+@keyframes riseUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .venue-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px) {
+  nav { padding: 0 1.2rem; }
+  .countdown-grid { gap: 0; }
+  .count-unit { padding: 1.5rem 0.5rem; }
+  .hero-meta { gap: 1rem; }
+  .events-grid { grid-template-columns: 1fr; }
+  .ann-item { grid-template-columns: 1fr; }
+  .ann-date { display: flex; gap: 0.5rem; align-items: baseline; }
+  .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- PRELOADER -->
+<div class="preloader" id="preloader">
+  <span class="pl-logo">Critically Yours</span>
+  <span class="pl-sub">DPS Megacity · Kolkata</span>
+  <div class="pl-bar"><div class="pl-progress"></div></div>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a href="index.html" class="nav-logo">Critically <em>Yours</em></a>
+  <div class="nav-right">
+    <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">
+      <i id="theme-icon" class="fas fa-moon"></i>
+    </button>
+    <a href="login.html" class="nav-login">Login</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow hero-glow-1"></div>
+  <div class="hero-glow hero-glow-2"></div>
+  <div class="hero-glow hero-glow-3"></div>
+  <div class="hero-vline"></div>
+  <div class="hero-ghost">CY</div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">The Annual Humanities Festival</p>
+    <p class="hero-school">Delhi Public School Megacity &ensp;·&ensp; Kolkata</p>
+    <h1 class="hero-title">
+      <span class="line-c">Critically</span>
+    </h1>
+    <div class="hero-ornament">
+      <div class="hero-ornament-icon"></div>
+    </div>
+    <h1 class="hero-title">
+      <span class="line-y">Yours</span>
+    </h1>
+    <p class="hero-tagline" id="hero-tagline">Where intellect meets expression — an intra-school celebration of humanities, culture, and critical thought.</p>
+    <div class="hero-cta">
+      <a href="register.html" class="btn-primary"><i class="fas fa-pen-nib"></i> Register Now</a>
+      <a href="#events" class="btn-outline">View Events</a>
+    </div>
+    <div class="hero-meta" id="hero-meta">
+      <div class="hero-meta-item">
+        <span>Institution</span>
+        <span>DPS Megacity</span>
+      </div>
+      <div class="hero-meta-sep"></div>
+      <div class="hero-meta-item">
+        <span>City</span>
+        <span>Kolkata</span>
+      </div>
+      <div class="hero-meta-sep"></div>
+      <div class="hero-meta-item">
+        <span>Genre</span>
+        <span>Humanities</span>
+      </div>
+    </div>
+    <div class="scroll-cue">
+      <span>Scroll to explore</span>
+      <div class="scroll-cue-line"></div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-inner" id="marquee-inner">
+    <span class="marquee-item"><i class="fas fa-star"></i>Critically Yours</span>
+    <span class="marquee-item"><i class="fas fa-circle"></i>DPS Megacity</span>
+    <span class="marquee-item"><i class="fas fa-star"></i>Humanities Fest</span>
+    <span class="marquee-item"><i class="fas fa-circle"></i>Kolkata</span>
+    <span class="marquee-item"><i class="fas fa-star"></i>Debate</span>
+    <span class="marquee-item"><i class="fas fa-circle"></i>Literature</span>
+    <span class="marquee-item"><i class="fas fa-star"></i>Philosophy</span>
+    <span class="marquee-item"><i class="fas fa-circle"></i>Creative Writing</span>
+    <span class="marquee-item"><i class="fas fa-star"></i>Critically Yours</span>
+    <span class="marquee-item"><i class="fas fa-circle"></i>DPS Megacity</span>
+    <span class="marquee-item"><i class="fas fa-star"></i>Humanities Fest</span>
+    <span class="marquee-item"><i class="fas fa-circle"></i>Kolkata</span>
+    <span class="marquee-item"><i class="fas fa-star"></i>Debate</span>
+    <span class="marquee-item"><i class="fas fa-circle"></i>Literature</span>
+    <span class="marquee-item"><i class="fas fa-star"></i>Philosophy</span>
+    <span class="marquee-item"><i class="fas fa-circle"></i>Creative Writing</span>
+  </div>
+</div>
+
+<!-- COUNTDOWN -->
+<section class="countdown-section">
+  <div class="reveal">
+    <p class="section-label">Time Remaining</p>
+    <p style="text-align:center;font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;font-style:italic;color:var(--text);margin-bottom:3rem;">Until the Fest Begins</p>
+    <div class="countdown-grid">
+      <div class="count-unit">
+        <span class="count-num" id="cd-days">--</span>
+        <span class="count-label">Days</span>
+      </div>
+      <div class="count-sep-wrap"><span class="count-sep">:</span></div>
+      <div class="count-unit">
+        <span class="count-num" id="cd-hrs">--</span>
+        <span class="count-label">Hours</span>
+      </div>
+      <div class="count-sep-wrap"><span class="count-sep">:</span></div>
+      <div class="count-unit">
+        <span class="count-num" id="cd-min">--</span>
+        <span class="count-label">Minutes</span>
+      </div>
+      <div class="count-sep-wrap"><span class="count-sep">:</span></div>
+      <div class="count-unit">
+        <span class="count-num" id="cd-sec">--</span>
+        <span class="count-label">Seconds</span>
+      </div>
+    </div>
+    <p class="fest-date-info" id="fest-date-info">Loading fest details…</p>
+  </div>
+</section>
+
+<!-- EVENTS -->
+<section class="events-section" id="events">
+  <div class="section-header reveal">
+    <p class="section-label">Participate</p>
+    <h2>Events &amp; Competitions</h2>
+    <p id="events-subtitle">Loading events…</p>
+  </div>
+  <div class="events-grid" id="events-grid">
+    <div class="load-placeholder"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+  </div>
+</section>
+
+<!-- DIVIDER -->
+<div style="padding:1.5rem 0"><div class="ornamental-divider"><span class="ornamental-divider-text">Latest Updates</span></div></div>
+
+<!-- ANNOUNCEMENTS -->
+<section class="announcements-section" id="announcements">
+  <div class="section-header reveal">
+    <p class="section-label">Stay Informed</p>
+    <h2>Announcements</h2>
+  </div>
+  <div class="ann-list" id="ann-list">
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section class="timeline-section" id="schedule">
+  <div class="section-header reveal">
+    <p class="section-label">Programme</p>
+    <h2>Schedule &amp; Timeline</h2>
+  </div>
+  <div class="timeline" id="timeline">
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+  </div>
+</section>
+
+<!-- VENUE -->
+<section class="venue-section" id="venue">
+  <div class="section-header reveal">
+    <p class="section-label">Where to Find Us</p>
+    <h2>Venue</h2>
+  </div>
+  <div class="venue-inner reveal">
+    <div class="venue-text">
+      <h3>Delhi Public School<br>Megacity</h3>
+      <div class="venue-row">
+        <div class="venue-icon-wrap"><i class="fas fa-map-marker-alt"></i></div>
+        <div class="venue-row-text">
+          <p>Address</p>
+          <p id="venue-addr">Kolkata, West Bengal</p>
+        </div>
+      </div>
+      <div class="venue-row">
+        <div class="venue-icon-wrap"><i class="fas fa-calendar-alt"></i></div>
+        <div class="venue-row-text">
+          <p>Date</p>
+          <p id="venue-date">To be announced</p>
+        </div>
+      </div>
+      <div class="venue-row">
+        <div class="venue-icon-wrap"><i class="fas fa-clock"></i></div>
+        <div class="venue-row-text">
+          <p>Timing</p>
+          <p id="venue-time">To be announced</p>
+        </div>
+      </div>
+    </div>
+    <div class="venue-map-placeholder">
+      <i class="fas fa-map-marked-alt"></i>
+      <span>Delhi Public School Megacity</span>
+      <span style="font-size:0.72rem;color:var(--text3)">Kolkata, West Bengal</span>
+    </div>
+  </div>
+</section>
+
+<!-- RULES -->
+<section class="rules-section" id="rules">
+  <div class="section-header reveal">
+    <p class="section-label">Guidelines</p>
+    <h2>Rules &amp; Regulations</h2>
+  </div>
+  <div class="rules-inner" id="rules-container">
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <span class="f-logo">Critically Yours</span>
+      <span class="f-sub">DPS Megacity &nbsp;·&nbsp; Humanities Fest</span>
+      <p>An annual celebration of literature, debate, philosophy, and the humanities at Delhi Public School Megacity, Kolkata.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Navigate</h4>
+      <a href="#events">Events</a>
+      <a href="#announcements">Announcements</a>
+      <a href="#schedule">Schedule</a>
+      <a href="#venue">Venue</a>
+      <a href="#rules">Rules</a>
+    </div>
+    <div class="footer-col">
+      <h4>Account</h4>
+      <a href="login.html">Login</a>
+      <a href="register.html">Register</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Delhi Public School Megacity. All rights reserved.</p>
+    <p>Designed with care for <a href="#">DPS Megacity</a></p>
+  </div>
+</footer>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+/* ── Firebase ── */
+const firebaseConfig = {
+  apiKey: "AIzaSyAHOGmSG7Uh340hmdla2CqPvYFLlfB_fy4",
+  authDomain: "critically-yours-dpsm.firebaseapp.com",
+  projectId: "critically-yours-dpsm",
+  storageBucket: "critically-yours-dpsm.firebasestorage.app",
+  messagingSenderId: "605711498105",
+  appId: "1:605711498105:web:492c746abafa854412cda8"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+/* ── Preloader ── */
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('preloader').classList.add('done'), 400);
+});
+setTimeout(() => document.getElementById('preloader').classList.add('done'), 2400);
+
+/* ── Custom Cursor ── */
+const dot  = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let mx = -100, my = -100, rx = -100, ry = -100;
+window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function loop() {
+  dot.style.left  = mx + 'px';
+  dot.style.top   = my + 'px';
+  rx += (mx - rx) * 0.14;
+  ry += (my - ry) * 0.14;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(loop);
+})();
+document.querySelectorAll('a, button, .event-card, .rule-header').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+});
+
+/* ── Navbar scroll ── */
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+});
+
+/* ── Theme ── */
+function toggleTheme() {
+  const html = document.documentElement;
+  const dark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', dark ? 'light' : 'dark');
+  document.getElementById('theme-icon').className = dark ? 'fas fa-sun' : 'fas fa-moon';
+  localStorage.setItem('cy-theme', dark ? 'light' : 'dark');
+}
+(function() {
+  const s = localStorage.getItem('cy-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', s);
+  document.getElementById('theme-icon').className = s === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+})();
+
+/* ── Scroll Reveal ── */
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+      revealObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+/* ── Countdown ── */
+let festDate = null;
+async function loadFestInfo() {
+  try {
+    const doc = await db.collection('settings').doc('festInfo').get();
+    if (doc.exists) {
+      const d = doc.data();
+      if (d.festDate) festDate = d.festDate.toDate ? d.festDate.toDate() : new Date(d.festDate);
+      if (d.venue) document.getElementById('venue-addr').textContent = d.venue;
+      if (d.festDateDisplay) document.getElementById('venue-date').textContent = d.festDateDisplay;
+      if (d.festTime) document.getElementById('venue-time').textContent = d.festTime;
+      if (d.tagline) document.getElementById('hero-tagline').textContent = d.tagline;
+      if (d.festDateDisplay) document.getElementById('fest-date-info').innerHTML =
+        `Fest Date: <span>${d.festDateDisplay}</span>${d.festTime ? ' &ensp;·&ensp; ' + d.festTime : ''}`;
+    } else {
+      document.getElementById('fest-date-info').textContent = 'Fest date to be announced';
+    }
+  } catch(e) {
+    document.getElementById('fest-date-info').textContent = 'Fest details coming soon';
+  }
+}
+function updateCountdown() {
+  if (!festDate) { ['cd-days','cd-hrs','cd-min','cd-sec'].forEach(id => document.getElementById(id).textContent = '--'); return; }
+  const diff = festDate - new Date();
+  if (diff <= 0) {
+    document.getElementById('fest-date-info').innerHTML = '<span>The fest has begun!</span>';
+    ['cd-days','cd-hrs','cd-min','cd-sec'].forEach(id => document.getElementById(id).textContent = '00');
+    return;
+  }
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('cd-days').textContent = pad(Math.floor(diff/86400000));
+  document.getElementById('cd-hrs').textContent  = pad(Math.floor((diff%86400000)/3600000));
+  document.getElementById('cd-min').textContent  = pad(Math.floor((diff%3600000)/60000));
+  document.getElementById('cd-sec').textContent  = pad(Math.floor((diff%60000)/1000));
+}
+
+/* ── Events ── */
+async function loadEvents() {
+  const grid = document.getElementById('events-grid');
+  const sub  = document.getElementById('events-subtitle');
+  try {
+    const snap = await db.collection('events').where('status','!=','deleted').orderBy('status').orderBy('createdAt','asc').get();
+    if (snap.empty) {
+      grid.innerHTML = `<div class="events-empty"><i class="fas fa-feather-alt"></i><p>Events will be announced soon. Stay tuned!</p></div>`;
+      sub.textContent = 'Events will be announced soon'; return;
+    }
+    sub.textContent = `${snap.size} event${snap.size>1?'s':''} this year`;
+    grid.innerHTML = '';
+    snap.docs.forEach((doc, i) => {
+      const e = doc.data();
+      const card = document.createElement('div');
+      card.className = 'event-card reveal';
+      card.setAttribute('data-num', String(i+1).padStart(2,'0'));
+      card.innerHTML = `
+        <p class="event-num-tag">Event ${String(i+1).padStart(2,'0')}</p>
+        <h3 class="event-name">${e.title||'Untitled Event'}</h3>
+        <p class="event-desc">${e.description||'Description coming soon.'}</p>
+        <div class="event-tags">
+          ${e.date?`<span class="event-tag"><i class="fas fa-calendar-alt"></i>${e.date}</span>`:''}
+          ${e.time?`<span class="event-tag"><i class="fas fa-clock"></i>${e.time}</span>`:''}
+          ${e.venue?`<span class="event-tag"><i class="fas fa-map-pin"></i>${e.venue}</span>`:''}
+          ${e.maxParticipants?`<span class="event-tag"><i class="fas fa-users"></i>Max ${e.maxParticipants}</span>`:''}
+        </div>`;
+      grid.appendChild(card);
+      revealObs.observe(card);
+      card.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+      card.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+    });
+  } catch(err) {
+    grid.innerHTML = `<div class="events-empty"><i class="fas fa-exclamation-circle"></i><p>Could not load events. Please try again.</p></div>`;
+  }
+}
+
+/* ── Announcements ── */
+async function loadAnnouncements() {
+  const list = document.getElementById('ann-list');
+  try {
+    const snap = await db.collection('announcements').where('isPublic','==',true).orderBy('createdAt','desc').limit(10).get();
+    if (snap.empty) { list.innerHTML = '<p class="ann-empty">No announcements yet. Check back soon.</p>'; return; }
+    list.innerHTML = '';
+    snap.docs.forEach(doc => {
+      const a = doc.data();
+      const d = a.createdAt ? a.createdAt.toDate() : new Date();
+      const item = document.createElement('div');
+      item.className = 'ann-item reveal';
+      item.innerHTML = `
+        <div class="ann-date">
+          <span class="ann-date-num">${d.getDate()}</span>
+          <span class="ann-date-mon">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</span>
+        </div>
+        <div class="ann-content">
+          <h4>${a.title||'Announcement'}</h4>
+          <p>${a.content||''}</p>
+        </div>`;
+      list.appendChild(item);
+      revealObs.observe(item);
+    });
+  } catch(e) { list.innerHTML = '<p class="ann-empty">Could not load announcements.</p>'; }
+}
+
+/* ── Timeline ── */
+async function loadTimeline() {
+  const el = document.getElementById('timeline');
+  try {
+    const snap = await db.collection('schedule').orderBy('order','asc').get();
+    if (snap.empty) { el.innerHTML = '<p class="tl-empty">Schedule to be announced.</p>'; return; }
+    el.innerHTML = '';
+    snap.docs.forEach(doc => {
+      const s = doc.data();
+      const item = document.createElement('div');
+      item.className = 'tl-item reveal';
+      item.innerHTML = `
+        <div class="tl-dot"></div>
+        <p class="tl-time">${s.time||''}</p>
+        <h4 class="tl-title">${s.title||''}</h4>
+        <p class="tl-desc">${s.description||''}</p>`;
+      el.appendChild(item);
+      revealObs.observe(item);
+    });
+  } catch(e) { el.innerHTML = '<p class="tl-empty">Schedule coming soon.</p>'; }
+}
+
+/* ── Rules ── */
+async function loadRules() {
+  const el = document.getElementById('rules-container');
+  try {
+    const snap = await db.collection('rules').orderBy('order','asc').get();
+    if (snap.empty) { el.innerHTML = '<p style="color:var(--text3);text-align:center;font-size:.87rem;padding:2rem">Rules and guidelines will be published soon.</p>'; return; }
+    let html = '<div class="rule-accordion">';
+    snap.docs.forEach(doc => {
+      const r = doc.data();
+      html += `<div class="rule-item"><div class="rule-header" onclick="toggleRule(this)"><span>${r.title||'Rule'}</span><i class="fas fa-chevron-down"></i></div><div class="rule-body">${r.content||''}</div></div>`;
+    });
+    html += '</div>';
+    el.innerHTML = html;
+  } catch(e) { el.innerHTML = '<p style="color:var(--text3);text-align:center;font-size:.87rem;padding:2rem">Rules coming soon.</p>'; }
+}
+
+function toggleRule(header) {
+  header.classList.toggle('open');
+  header.nextElementSibling.classList.toggle('open');
+}
+
+/* ── Init ── */
+loadFestInfo().then(() => setInterval(updateCountdown, 1000));
+updateCountdown();
+loadEvents();
+loadAnnouncements();
+loadTimeline();
+loadRules();
+</script>
+</body>
+</html>
