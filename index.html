@@ -184,6 +184,27 @@ nav {
   height: 66px;
   border-bottom: 1px solid transparent;
   transition: all var(--t2);
+   .nav-status-badge {
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: var(--text2);
+  background: var(--border);
+  padding: 0.4rem 0.9rem;
+  border-radius: 4px;
+  border: 1px solid rgba(200,151,58,0.2);
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 500px;
+  text-align: left;
+}
+.nav-status-badge i {
+  color: var(--gold);
+}
+@media (max-width: 768px) {
+  .nav-status-badge { display: none; } /* Prevents overlapping on small mobile viewports */
+}
 }
 nav.scrolled {
   background: rgba(6,6,12,0.92);
@@ -1169,7 +1190,8 @@ footer {
 
 <!-- NAVBAR -->
 <nav id="navbar">
-  <a href="index.html" class="nav-logo">Critically <em>Yours</em></a> Unofficial Website at the moment. It will be official once approved by School Authorities.
+  <a href="index.html" class="nav-logo">Critically <em>Yours</em></a>
+  <span class="nav-status-badge"><i class="fas fa-info-circle"></i> Unofficial Website at the moment. It will be official once approved by School Authorities.</span>
   <div class="nav-right">
     <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">
       <i id="theme-icon" class="fas fa-moon"></i>
